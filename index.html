@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SteveAI Interactive Chat</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; max-width: 800px; margin: 0 auto; }
+        #output { background: #f4f4f4; padding: 15px; border-radius: 8px; min-height: 100px; white-space: pre-wrap; margin-top: 20px; }
+        input { width: 70%; padding: 10px; border-radius: 4px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
+        button:disabled { background: #ccc; }
+    </style>
+</head>
+<body>
+
+    <h2>AI Prompt Explorer</h2>
+    <input type="text" id="userPrompt" placeholder="Ask AI anything..." value="Write a short poem about coding.">
+    <button id="sendBtn">Generate</button>
+
+    <div id="output">The AI response will appear here...</div>
+
+    <script src="https://js.puter.com/v2/"></script>
+    <script>
+        const outputDiv = document.getElementById('output');
+        const sendBtn = document.getElementById('sendBtn');
+        const promptInput = document.getElementById('userPrompt');
+
+        sendBtn.onclick = async () => {
+            const prompt = promptInput.value;
+            if (!prompt) return;
+
+            // UI Feedback
+            outputDiv.innerText = "Thinking...";
+            sendBtn.disabled = true;
+
+            try {
+                const response = await puter.ai.chat(prompt, {
+                    model: 'claude-sonnet-4-5', 
+                    stream: true
+                });
+                
+                outputDiv.innerText = ""; // Clear "Thinking..."
+
+                for await (const part of response) {
+                    // Use puter.print if you want it in the Puter console, 
+                    // or append to the div for a web UI feel:
+                    outputDiv.innerText += part?.text || "";
+                }
+            } catch (error) {
+                outputDiv.innerText = "Error: " + error.message;
+            } finally {
+                sendBtn.disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>
