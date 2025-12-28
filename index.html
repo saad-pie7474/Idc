@@ -2,19 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SteveAI Pro</title>
+    <title>AI Playground</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
-        iframe {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            border: none;
-            outline: none;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: #121212; color: white; display: flex; flex-direction: column; align-items: center; padding: 40px; }
+        .chat-card { width: 100%; max-width: 700px; background: #1e1e1e; padding: 25px; border-radius: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #2d2d2d; color: white; outline: none; }
+        
+        /* Send Button */
+        #sendBtn { padding: 10px 20px; border-radius: 8px; border: none; background: #007bff; color: white; cursor: pointer; font-weight: bold; }
+        #sendBtn:hover { background: #0056b3; }
+        
+        /* Reset Button */
+        #resetBtn { padding: 10px 15px; border-radius: 8px; border: 1px solid #444; background: transparent; color: #888; cursor: pointer; font-size: 12px; }
+        #resetBtn:hover { border-color: #ff4757; color: #ff4757; }
+
+        #engineFrame { width: 100%; height: 500px; border: 1px solid #333; border-radius: 8px; background: #1a1a1a; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body>
-    <iframe src="https://letscheck.puter.site"></iframe>
+
+    <div class="chat-card">
+        <h2>AI Engine Explorer</h2>
+        
+        <div class="input-group">
+            <input type="text" id="userPrompt" placeholder="Type a message (e.g., 'What is my name?')..." onkeydown="if(event.key==='Enter') sendPrompt()">
+            <button id="sendBtn" onclick="sendPrompt()">Send</button>
+        </div>
+
+        <div class="header-row">
+            <div class="label">Conversation (Markdown Enabled)</div>
+            <button id="resetBtn" onclick="document.getElementById('engineFrame').src += ''">Clear Memory</button>
+        </div>
+
+        <iframe id="engineFrame" src="https://letscheck.puter.site"></iframe>
+    </div>
+
+    <script>
+        const PUTER_URL = "https://letscheck.puter.site";
+
+        function sendPrompt() {
+            const input = document.getElementById('userPrompt');
+            const engine = document.getElementById('engineFrame');
+            
+            if (!input.value) return;
+
+            // Send to Puter
+            engine.contentWindow.postMessage({ prompt: input.value }, PUTER_URL);
+            
+            // Clear input for next message
+            input.value = "";
+        }
+
+        window.addEventListener("message", (event) => {
+            if (event.origin !== PUTER_URL) return;
+            // You can still log chunks here for debugging
+            if (event.data.type === 'AI_RESPONSE' && event.data.isDone) {
+                console.log("AI finished responding.");
+            }
+        });
+    </script>
 </body>
 </html>
